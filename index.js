@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require('express')
-const port = 80
+const port = process.env.PORT || 3000
 const ejs = require('ejs')
 const path = require('path')
 const ejsMate = require('ejs-mate');
