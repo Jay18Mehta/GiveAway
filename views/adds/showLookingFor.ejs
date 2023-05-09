@@ -1,0 +1,69 @@
+<% layout('layouts/boilerplate')%>
+<link rel="stylesheet" href="/stylesheets/stars.css">
+<style>
+    img{
+     max-width: 255px;
+     max-height: 255px;
+    }
+</style>
+<div class="d-flex">
+    <div class="flex-grow-1">
+        <h2><%=lookingfor.productName%></h2>
+        <img src="<%=lookingfor.image.url%>" class="card-image-top" alt="...">
+        <p><%=lookingfor.description%></p>
+        <% if( currentUser ){ %>
+            <% if(currentUser.friendsList.some(friend=>friend.friendId==lookingfor.author._id.toString())){ %>
+                <h4>Email ID : <%=lookingfor.author.email %></h4>
+            <% } else if(currentUser._id.toString() != lookingfor.author._id.toString()){%>
+            <form method="post" action="/index/lookingfor/<%=lookingfor._id%>/sendReq"  novalidate class="validated-form">
+                <button class="btn btn-info">Request</button>
+            </form>
+            <% } %>
+        <% } %>
+        <%  if( currentUser && lookingfor.author.equals(currentUser._id))  {%>
+        <form method="post" action="/index/lookingfor/<%=lookingfor._id%>/delete?_method=DELETE"  novalidate class="validated-form">
+            <button class="btn btn-danger">Delete</button>
+        </form>
+        <% } %>
+    </div>
+    <div class="flex-grow-1">
+        <h2>Leave a Review</h2>
+        <form method="post" action="/index/lookingfor/<%=lookingfor._id%>/reviews" novalidate class="validated-form">
+            <fieldset class="starability-basic">
+                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked
+                    aria-label="No rating." />
+                <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                <label for="first-rate1" title="Terrible">1 star</label>
+                <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                <label for="first-rate2" title="Not good">2 stars</label>
+                <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                <label for="first-rate3" title="Average">3 stars</label>
+                <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                <label for="first-rate4" title="Very good">4 stars</label>
+                <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                <label for="first-rate5" title="Amazing">5 stars</label>
+            </fieldset>
+            <div class="mb-3">
+                <label class="form-label" for="body">Review Text</label>
+                <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
+                <div class="valid-feedback">
+                    Looks good!
+                </div>
+            </div>
+            <button class="btn btn-success">Submit</button>
+        </form>
+        <%for(let review of lookingfor.reviews){%>
+            <p class="starability-result" data-rating="<%=review.rating%>">
+                Rated: <%= review.rating %> stars
+            </p>
+            <p class="card-text">Review: <%= review.body %></p>
+            <%  if( currentUser && review.author.equals(currentUser._id))  {%>
+                <form action="/index/lookingfor/<%=lookingfor._id%>/reviews/<%=review._id%>?_method=DELETE" method="POST">
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+                <% } %>
+        <% } %>
+    </div>
+</div>
+
+<script src='/javascripts/validateForms.js'></script>

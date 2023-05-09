@@ -1,0 +1,55 @@
+<% layout('layouts/boilerplate')%>
+<!-- <div class="container px-4 text-center"> -->
+  <div class="row gx-5">
+    <div class="col">
+    <h2>Contact Requests</h2>
+    <table>
+    <% if(currentUser.request.length){ %>
+      <%for(let request of currentUser.request){%>
+        <tr>
+                <td><h6 class="pr-3"><%=request.username%> :</h6></td>
+                <td><form  class ="pr-2"action="/index/<%=request.userId%>/acceptReq" method="post">
+                  <button class="btn btn-success">Add Friend</button>
+                </form></td>
+                <td><form class = "float-end"action="/index/<%=request.userId%>/deleteReq" method="post">
+                  <button class="btn btn-info">Delete</button>
+                </form> </td> 
+              </div>
+            </tr>
+      <% } %>
+    <% } %>
+  </table>
+    </div>
+      <div class="col">
+    <h2>Requested</h2>
+      <table>
+        <%for(let followReq of currentUser.sentRequest){%>
+          <!-- <div class="p-3 d-flex"> -->
+            <tr>
+            <td><h6 class="pr-3"><%=followReq.username%> :</h6></td>
+            <td><form action="/index/<%=followReq.username%>/cancelReq" method="post">
+              <button class="btn btn-warning">Cancel Request</button>
+            </form></td>
+          </tr>
+          </div>
+        <% } %>
+      </table>
+      
+    </div>
+    <div class="col">
+    <h2>Friends</h2>
+      <table>
+        <% for(let friend of currentUser.friendsList){ %>
+          <tr>
+          <!-- <div class="p-3 d-flex"> -->
+            <td><h6 class="pr-3"><%=friend.friendName %></h6></td>
+            <td><form action="/index/<%=friend.friendId%>/removeFriend" method="post">
+            <button class="btn btn-danger">Remove Friend</button>
+          </form></td>
+        </tr>
+        </div>
+      <% } %>
+    </table>    
+        </div>
+  </div>
+<!-- </div> -->
