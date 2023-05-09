@@ -145,7 +145,7 @@ const sendVerificationMail = async(email,username,_id)=>{
         from:'mehtajay@gmail.com',
         to:email,
         subject:'Give Away Verification Mail',
-        html:`<p>Hi ${username}, please click on the link to <a href = "/localhost/index/verify?id=${_id}">Verify</a></p>`
+        html:`<p>Hi ${username}, please click on the link to <a href = "cute-puce-macaw-tux.cyclic.app/index/verify?id=${_id}">Verify</a></p>`
     }
     transporter.sendMail(mailOptions,function(error,info){
       if(error){
