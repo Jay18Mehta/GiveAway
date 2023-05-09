@@ -306,7 +306,7 @@ app.delete("/index/lookingfor/:id/delete",isLoggedIn,isVerified,isLookingforAuth
 }))
 
 // review routes
-app.post('/index/giveaway/:id/reviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
+app.post('/index/giveaway/:id/reviews',isLoggedIn,catchAsync(async(req,res,next)=>{
   const {id} = req.params;
   const giveaway = await Giveaway.findById(id);
   const review = new Review(req.body.review)
@@ -318,7 +318,7 @@ app.post('/index/giveaway/:id/reviews',isLoggedIn,isVerified,catchAsync(async(re
   res.redirect(`/index/giveaway/${giveaway._id}`)
 }))
 
-app.post('/index/lookingfor/:id/reviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
+app.post('/index/lookingfor/:id/reviews',isLoggedIn,catchAsync(async(req,res,next)=>{
   const lookingfor = await Lookingfor.findById(req.params.id);
   // console.log(req.params.id)
   const review = new Review(req.body.review)
