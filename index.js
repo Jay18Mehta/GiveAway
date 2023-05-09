@@ -142,7 +142,7 @@ const sendVerificationMail = async(email,username,_id)=>{
       }
     })
     const mailOptions={
-        from:'mehtajay@gmail.com',
+        from:'mehtajay1803@gmail.com',
         to:email,
         subject:'Give Away Verification Mail',
         html:`<p>Hi ${username}, please click on the link to <a href = "/cute-puce-macaw-tux.cyclic.app/index/verify?id=${_id}">Verify</a></p>`
