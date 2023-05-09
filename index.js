@@ -159,7 +159,7 @@ const sendVerificationMail = async(email,username,_id)=>{
 
 //ends
 
-app.get('/', catchAsync(async(req,res,next)=>{
+app.get('/index', catchAsync(async(req,res,next)=>{
     const giveaways =  await Giveaway.find({})
     const lookingfors = await Lookingfor.find({})
     // for(let giveaway of giveaways){
