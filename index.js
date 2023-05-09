@@ -14,6 +14,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const nodemailer = require('nodemailer')
 const multer = require('multer')
+const MongoDBStore = require('connect-mongo')(session);
 
 const { cloudinary } = require("./cloudinary");
 const { storage } = require("./cloudinary");
@@ -53,8 +54,20 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
 
+const store = new MongoDBStore({
+  url:process.env.MONGO_URI,
+  secret:process.env.SESSION_SECRET,
+  touchAfter:24*60*60
+})
+
+store.on("error",function(e){
+  console.log("Session-Store-Error",e)
+})
+
 const sessionConfig = {
   // secret: 'thisshouldbeabettersecret!',
+  store,
+  name:'session',
   secret:process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
