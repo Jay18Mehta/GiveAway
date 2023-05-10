@@ -275,11 +275,11 @@ app.get('/index/login',(req,res)=>{
 
 app.post('/index/login',
   passport.authenticate('local', { failureRedirect: '/index/login', failureFlash: true }),
-  catchAsync(function(req, res,next) {
-    // req.flash('success','welcome back')
+  function(req, res) {
+    req.flash('success','welcome back')
     // console.log(req.user)
     res.redirect('/index');
-  }));
+  });
 
 app.get('/index/logout',(req,res)=>{
   req.logout(function(err) {
@@ -320,6 +320,7 @@ app.delete("/index/lookingfor/:id/delete",isLoggedIn,isVerified,isLookingforAuth
 
 // review routes
 app.post('/index/giveaway/:id/reviews',isVerified,catchAsync(async(req,res,next)=>{
+  console.log(req.user.username)
   if(!req.isAuthenticated()){
     req.flash('error','You must be Logged In')
      return res.redirect('/index/login')
@@ -336,6 +337,7 @@ app.post('/index/giveaway/:id/reviews',isVerified,catchAsync(async(req,res,next)
 }))
 
 app.post('/index/lookingfor/:id/reviews',isVerified,catchAsync(async(req,res,next)=>{
+  console.log(req.user.username)
   if(!req.isAuthenticated()){
     req.flash('error','You must be Logged In')
      return res.redirect('/index/login')
