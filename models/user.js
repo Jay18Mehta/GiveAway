@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const Review = require("./review")
 const passportLocalMongoose = require("passport-local-mongoose")
 
 const UserSchema = new mongoose.Schema({
@@ -7,6 +8,12 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    reviews:[
+        {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Review'
+        }
+    ],
     isVerified:{
         type:Number,
         default:0,

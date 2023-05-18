@@ -292,14 +292,20 @@ app.get('/index/logout',(req,res)=>{
 app.get('/index/giveaway/:id',catchAsync(async(req,res,next)=>{
   const {id} =req.params
   const giveaway = await Giveaway.findById(id).populate('reviews').populate('author')
+  const user = await User.findById({_id:giveaway.author._id}).populate('reviews')
   // console.log(giveaway)
-  res.render('adds/showGiveaway.ejs',{giveaway})
+  res.render('adds/showGiveaway.ejs',{giveaway,user})
+  // const {id} =req.params
+  // const giveaway = await Giveaway.findById(id).populate('reviews').populate('author')
+  // // console.log(giveaway)
+  // res.render('adds/showGiveaway.ejs',{giveaway})
 }))
 
 app.get('/index/lookingfor/:id',catchAsync(async(req,res,next)=>{
   const {id} =req.params
   const lookingfor =await Lookingfor.findById(id).populate('reviews').populate('author')
-  res.render('adds/showLookingFor.ejs',{lookingfor})
+  const user = await User.findById({_id:lookingfor.author._id}).populate('reviews')
+  res.render('adds/showLookingFor.ejs',{lookingfor,user})
 }))
 
 app.delete("/index/giveaway/:id/delete",isLoggedIn,isVerified,isGiveawayAuthor,catchAsync(async(req,res,next)=>{
@@ -325,13 +331,25 @@ app.post('/index/giveaway/:id/reviews',isVerified,catchAsync(async(req,res,next)
     req.flash('error','You must be Logged In')
      return res.redirect('/index/login')
   }else{
-  const {id} = req.params;
-  const giveaway = await Giveaway.findById(id);
-  const review = new Review(req.body.review)
-  giveaway.reviews.push(review);
-  review.author = req.user._id
-  await review.save();
-  await giveaway.save();
+    const {id} = req.params;
+    const giveaway = await Giveaway.findById(id).populate('author','_id');
+    const review = new Review(req.body.review)
+    // console.log(giveaway.author.username)
+    const user = await User.findById({_id:giveaway.author._id})
+    // console.log(user)
+    giveaway.reviews.push(review);
+    user.reviews.push(review)
+    review.author = req.user._id
+    await review.save();
+    await giveaway.save();
+    await user.save();
+  // const {id} = req.params;
+  // const giveaway = await Giveaway.findById(id);
+  // const review = new Review(req.body.review)
+  // giveaway.reviews.push(review);
+  // review.author = req.user._id
+  // await review.save();
+  // await giveaway.save();
   // console.log(giveaway.reviews)
   res.redirect(`/index/giveaway/${giveaway._id}`)}
 }))
@@ -343,27 +361,39 @@ app.post('/index/lookingfor/:id/reviews',isVerified,catchAsync(async(req,res,nex
      return res.redirect('/index/login')
   }
   else{
-  const lookingfor = await Lookingfor.findById(req.params.id);
-  // console.log(req.params.id)
-  const review = new Review(req.body.review)
-  lookingfor.reviews.push(review);
-  review.author = req.user._id
-  await review.save();
-  await lookingfor.save();
+    const lookingfor = await Lookingfor.findById(req.params.id).populate('author','_id');
+    // console.log(req.params.id)
+    const review = new Review(req.body.review)
+    const user = await User.findById({_id:lookingfor.author._id})
+    user.reviews.push(review)
+    lookingfor.reviews.push(review);
+    review.author = req.user._id
+    await review.save();
+    await lookingfor.save();
+    await user.save()
+  // const lookingfor = await Lookingfor.findById(req.params.id);
+  // // console.log(req.params.id)
+  // const review = new Review(req.body.review)
+  // lookingfor.reviews.push(review);
+  // review.author = req.user._id
+  // await review.save();
+  // await lookingfor.save();
   res.redirect(`/index/lookingfor/${lookingfor._id}`)}
   // res.send(lookingfor)
 }))
 
 app.delete('/index/giveaway/:id/reviews/:reviewId',isLoggedIn,isReviewAuthor,isVerified,catchAsync(async(req,res,next)=>{
   const {id,reviewId}= req.params;
-  await Giveaway.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  const giveaway=await Giveaway.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  await User.findByIdAndUpdate({_id:giveaway.author._id},{ $pull: { reviews: reviewId } });
   await Review.findByIdAndDelete(reviewId)
   res.redirect(`/index/giveaway/${id}`)
 }))
 
 app.delete('/index/lookingfor/:id/reviews/:reviewId',isLoggedIn,isReviewAuthor,isVerified,catchAsync(async(req,res,next)=>{
   const {id,reviewId}= req.params;
-  await Lookingfor.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  const lookingfor=await Lookingfor.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  await User.findByIdAndUpdate({_id:lookingfor.author._id},{ $pull: { reviews: reviewId } });
   await Review.findByIdAndDelete(reviewId)
   res.redirect(`/index/lookingfor/${id}`)
 }))
