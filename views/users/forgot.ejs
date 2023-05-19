@@ -1,0 +1,15 @@
+<% layout('layouts/boilerplate')%>
+<h1>Forgot Password</h1>
+<form action="/index/forgotPassword" method="POST" class="validated-form" novalidate>
+    <div class="mb-3">
+        <label class="form-label" for="email">Email</label>
+        <input class="form-control w-50" type="email" id="email" name="email" required>
+        <div class="valid-feedback">
+            Looks good!
+        </div>
+    </div>
+    <button class="btn btn-success">Generate Email</button>
+    <!-- <a class="btn btn-info"href="/index/login">Back</a> -->
+</form>
+
+<script src="/javascripts/validateForms.js"></script>

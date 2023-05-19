@@ -30,7 +30,11 @@ const UserSchema = new mongoose.Schema({
      friendsList: [{
          friendId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
          friendName: {type: String, default: ''}
-     }]
+     }],
+     token:{
+        type:String,
+        default:''
+     }
 })
 
 UserSchema.plugin(passportLocalMongoose);

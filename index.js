@@ -15,6 +15,7 @@ const LocalStrategy = require('passport-local');
 const nodemailer = require('nodemailer')
 const multer = require('multer')
 const MongoDBStore = require('connect-mongo')(session);
+const randomstring = require('randomstring')
 
 const { cloudinary } = require("./cloudinary");
 const { storage } = require("./cloudinary");
@@ -169,7 +170,33 @@ const sendVerificationMail = async(email,username,_id)=>{
       }
     })
 }
-
+//send Reset password mail
+const sendResetPasswordMail = async(email,username,token)=>{
+  const transporter = nodemailer.createTransport({
+    host:'smtp.gmail.com',
+    port:587,
+    secure:false,
+    requireTLS:true,
+    auth:{
+      user:'mehtajay1803@gmail.com',
+      pass:process.env.NODEMAILER_PASSWORD
+    }
+  })
+  const mailOptions={
+      from:'mehtajay@gmail.com',
+      to:email,
+      subject:'Give Away Reset Password',
+      html:`<p>Hi ${username}, please click on the link to <a href = "cute-puce-macaw-tux.cyclic.app/index/resetPassword?token=${token}">Reset Password</a></p>`
+  }
+  transporter.sendMail(mailOptions,function(error,info){
+    if(error){
+      console.log(error)
+    }
+    else{
+      console.log('Email has been sent',info.response)
+    }
+  })
+}
 //ends
 
 app.get('/index', catchAsync(async(req,res,next)=>{
@@ -281,6 +308,42 @@ app.post('/index/login',
     res.redirect('/index');
   });
 
+  app.get('/index/forgotPassword',catchAsync(async(req,res,next)=>{
+    // const user = await User.find({email:req.body.email})
+    // console.log(user);
+    res.render('users/forgot.ejs');
+  }))
+
+  app.post('/index/forgotPassword',catchAsync(async(req,res,next)=>{
+    const user = await User.findOne({email:req.body.email})
+    // console.log(user)
+    if(!user){
+      req.flash("error",'No user with such Email ID exists')
+      return res.redirect('/index/forgotPassword')
+    }
+    if(user.isVerified != 1){
+      req.flash("error",'Your Email Id is not Verified')
+      return res.redirect('/index/forgotPassword')
+    }
+    const randomString= randomstring.generate()
+    await user.updateOne({$set:{token:randomString}})
+    sendResetPasswordMail(user.email,user.username,randomString)
+    // console.log(user);
+    // console.log(user.email);
+    req.flash("success",'Please check your Email')
+    res.redirect('/index/forgotPassword');
+  }))
+
+app.get('/index/resetPassword',catchAsync(async(req,res,next)=>{
+  const token = req.query.token
+  const user= await User.findOne({token:token})
+  if(!user || user.token == ''){
+    req.flash("error",'Invalid Token')
+    return res.redirect('/index/forgotPassword')
+  }
+  res.render('users/resetPassword.ejs',{user})
+}))
+
 app.get('/index/logout',(req,res)=>{
   req.logout(function(err) {
     if (err) { return next(err); }
@@ -288,6 +351,26 @@ app.get('/index/logout',(req,res)=>{
     res.redirect('/index');
   });  
 })
+
+app.post('/index/resetPassword/:id',catchAsync(async(req,res,next)=>{
+  const password = req.body.password
+  const user=await User.findByIdAndUpdate(req.params.id,{token:''})
+  User.findById(req.params.id).then(function(sanitizedUser){
+    if (sanitizedUser){
+        sanitizedUser.setPassword(password, function(){
+            sanitizedUser.save();
+            // const user = await User.findOne(req.params._id)
+            req.flash('success', "Password Updated Successfully!");
+            res.redirect('/index/login');
+        });
+    } else {
+      req.flash("error",'This User does not exists')
+      return res.redirect('/index/login')
+    }
+  },function(err){
+    console.error(err);
+  })
+}))
 
 app.get('/index/giveaway/:id',catchAsync(async(req,res,next)=>{
   const {id} =req.params
