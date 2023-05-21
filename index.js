@@ -408,12 +408,12 @@ app.delete("/index/lookingfor/:id/delete",isLoggedIn,isVerified,isLookingforAuth
 }))
 
 // review routes
-app.post('/index/giveaway/:id/reviews',isVerified,catchAsync(async(req,res,next)=>{
+app.post('/index/giveaway/:id/reviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
   console.log(req.user.username)
-  if(!req.isAuthenticated()){
-    req.flash('error','You must be Logged In')
-     return res.redirect('/index/login')
-  }else{
+  // if(!req.isAuthenticated()){
+  //   req.flash('error','You must be Logged In')
+  //    return res.redirect('/index/login')
+  // }else{
     const {id} = req.params;
     const giveaway = await Giveaway.findById(id).populate('author','_id');
     const review = new Review(req.body.review)
@@ -434,16 +434,16 @@ app.post('/index/giveaway/:id/reviews',isVerified,catchAsync(async(req,res,next)
   // await review.save();
   // await giveaway.save();
   // console.log(giveaway.reviews)
-  res.redirect(`/index/giveaway/${giveaway._id}`)}
+  res.redirect(`/index/giveaway/${giveaway._id}`)
 }))
 
-app.post('/index/lookingfor/:id/reviews',isVerified,catchAsync(async(req,res,next)=>{
-  console.log(req.user.username)
-  if(!req.isAuthenticated()){
-    req.flash('error','You must be Logged In')
-     return res.redirect('/index/login')
-  }
-  else{
+app.post('/index/lookingfor/:id/reviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
+  // console.log(req.user.username)
+  // if(!req.isAuthenticated()){
+  //   req.flash('error','You must be Logged In')
+  //    return res.redirect('/index/login')
+  // }
+  // else{
     const lookingfor = await Lookingfor.findById(req.params.id).populate('author','_id');
     // console.log(req.params.id)
     const review = new Review(req.body.review)
@@ -461,7 +461,7 @@ app.post('/index/lookingfor/:id/reviews',isVerified,catchAsync(async(req,res,nex
   // review.author = req.user._id
   // await review.save();
   // await lookingfor.save();
-  res.redirect(`/index/lookingfor/${lookingfor._id}`)}
+  res.redirect(`/index/lookingfor/${lookingfor._id}`)
   // res.send(lookingfor)
 }))
 
