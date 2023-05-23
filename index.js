@@ -329,6 +329,7 @@ app.post('/index/login',
     const randomString= randomstring.generate()
     await user.updateOne({$set:{token:randomString}})
     sendResetPasswordMail(user.email,user.username,randomString)
+    setTimeout(()=>console.log('timer'),15000);
     // console.log(user);
     // console.log(user.email);
     req.flash("success",'Please check your Email')
