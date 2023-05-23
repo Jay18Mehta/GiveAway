@@ -282,6 +282,7 @@ app.post("/index/register",catchAsync(async(req,res,next)=>{
        return next(err);
     }
     sendVerificationMail(req.body.email,req.body.username,user._id)
+    setTimeout(()=>console.log('timer'),15000);
     req.flash('success', 'Your registration is done, please verify your Email ID to continue');
     res.redirect('/index/register');
   })}catch(error){
