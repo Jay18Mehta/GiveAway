@@ -20,7 +20,6 @@ const UserSchema = new mongoose.Schema({
         enum:[0,1]
     },
     sentRequest:[{
-        // userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
          username: {type: String, default: ''}
      }],
      request: [{

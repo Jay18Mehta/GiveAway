@@ -5,7 +5,6 @@ const lookingforSchema = new mongoose.Schema({
     category:{
         type:String,
         required:true,
-        // enum:['book','cycle','phone','chair']
     },
     productName:{
         type:String,

@@ -1,26 +1,15 @@
 const mongoose = require('mongoose')
 const Review = require("./review")
 
-// const ImageSchema = new mongoose.Schema({
-//     url: String,
-//     filename: String
-// });
-
-// ImageSchema.virtual('thumbnail').get(function () {
-//     return this.url.replace('/upload','/upload/w_200');
-// });
-
 const giveawaySchema = new mongoose.Schema({
     category:{
         type:String,
         required:true,
-        // enum:['book','cycle','phone','chair']
     },
     productName:{
         type:String,
         required:true
     },
-    // image:{ImageSchema},
     image:{
         url:String,
         filename:String

@@ -1,5 +1,4 @@
 <% layout('layouts/boilerplate')%>
-<!-- <div class="container px-4 text-center"> -->
   <div class="row gx-5">
     <div class="col">
     <h2>Contact Requests</h2>
@@ -24,7 +23,6 @@
     <h2>Requested</h2>
       <table>
         <%for(let followReq of currentUser.sentRequest){%>
-          <!-- <div class="p-3 d-flex"> -->
             <tr>
             <td><h6 class="pr-3"><%=followReq.username%> :</h6></td>
             <td><form action="/index/<%=followReq.username%>/cancelReq" method="post">
@@ -41,7 +39,6 @@
       <table>
         <% for(let friend of currentUser.friendsList){ %>
           <tr>
-          <!-- <div class="p-3 d-flex"> -->
             <td><h6 class="pr-3"><%=friend.friendName %></h6></td>
             <td><form action="/index/<%=friend.friendId%>/removeFriend" method="post">
             <button class="btn btn-danger">Remove Friend</button>
@@ -52,4 +49,3 @@
     </table>    
         </div>
   </div>
-<!-- </div> -->

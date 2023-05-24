@@ -33,9 +33,7 @@ const mongoose = require('mongoose');
 main().catch(err => console.log(err));
 
 async function main() {
-  // await mongoose.connect('mongodb://127.0.0.1:27017/giveaway');
   await mongoose.connect(process.env.MONGO_URI)
-  
   // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
 }
 
@@ -66,7 +64,6 @@ store.on("error",function(e){
 })
 
 const sessionConfig = {
-  // secret: 'thisshouldbeabettersecret!',
   store,
   name:'session',
   secret:process.env.SESSION_SECRET,
@@ -90,17 +87,24 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
-  // console.log(req.session)
   res.locals.currentUser = req.user;
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
   next();
 })
-//authorization
+
 const isLoggedIn = (req,res,next)=>{
   if(!req.isAuthenticated()){
     req.flash('error','You must be Logged In')
      return res.redirect('/index/login')
+  }
+  next()
+}
+
+const isLoggedOut = (req,res,next)=>{
+  if(req.isAuthenticated()){
+    req.flash('error','You must be Logged Out')
+     return res.redirect('/index')
   }
   next()
 }
@@ -133,7 +137,6 @@ const isReviewAuthor = async (req, res, next) => {
   next();
 } 
 
-// ends
 const isVerified = async(req,res,next)=>{
   if(req.user.isVerified != 1){
     req.flash('error', 'Your Email ID must be verified to do that.');
@@ -150,13 +153,12 @@ const sendVerificationMail = async(email,username,_id)=>{
       secure:false,
       requireTLS:true,
       auth:{
-        user:'mehtajay1803@gmail.com',
-        // pass:'hioewrkptcsjzbka'
+        user:process.env.NODEMAILER_MAIL,
         pass:process.env.NODEMAILER_PASSWORD
       }
     })
     const mailOptions={
-        from:'mehtajay1803@gmail.com',
+        from:process.env.NODEMAILER_MAIL,
         to:email,
         subject:'Give Away Verification Mail',
         html:`<p>Hi ${username}, please click on the link to <a href = "cute-puce-macaw-tux.cyclic.app/index/verify?id=${_id}">Verify</a></p>`
@@ -178,12 +180,12 @@ const sendResetPasswordMail = async(email,username,token)=>{
     secure:false,
     requireTLS:true,
     auth:{
-      user:'mehtajay1803@gmail.com',
+      user:process.env.NODEMAILER_MAIL,
       pass:process.env.NODEMAILER_PASSWORD
     }
   })
   const mailOptions={
-      from:'mehtajay@gmail.com',
+      from:process.env.NODEMAILER_MAIL,
       to:email,
       subject:'Give Away Reset Password',
       html:`<p>Hi ${username}, please click on the link to <a href = "cute-puce-macaw-tux.cyclic.app/index/resetPassword?token=${token}">Reset Password</a></p>`
@@ -197,20 +199,16 @@ const sendResetPasswordMail = async(email,username,token)=>{
     }
   })
 }
-//ends
 
 app.get('/index', catchAsync(async(req,res,next)=>{
     const giveaways =  await Giveaway.find({})
     const lookingfors = await Lookingfor.find({})
-    // for(let giveaway of giveaways){
-    // console.log(giveaway.image);}
     res.render('adds/index.ejs',{giveaways,lookingfors})
 }))
 
 app.get('/index/search',catchAsync(async(req,res,next)=>{
   var adds = req.query.category;
   var location = req.query.location;
-  // console.log(adds,location)
   var giveaways = [];
   var lookingfors = [];
   if(!location){
@@ -230,7 +228,6 @@ app.get('/index/search',catchAsync(async(req,res,next)=>{
 
 app.get('/index/myAdds',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
   const giveaways =  await Giveaway.find({}).populate('author')
-  // console.log(giveaways)
   const lookingfors = await Lookingfor.find({}).populate('author')
   res.render('adds/myadds.ejs',{giveaways,lookingfors})
 }))
@@ -241,7 +238,6 @@ app.get('/index/profile',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
 }))
 
 app.get('/index/newGiveaway',isLoggedIn,isVerified,async(req,res)=>{
-    // console.log(req.user.isVerified);
   res.render('adds/newGiveaway.ejs')
 })
 
@@ -267,7 +263,6 @@ app.post('/index/newLookingFor',isLoggedIn,isVerified,upload.single('lookingfor[
   res.redirect(`/index/giveaway/${giveaway._id}`)
 }))
 
-//user Routes
 app.get("/index/register",(req,res)=>{
   res.render("users/register.ejs")
 })
@@ -305,19 +300,15 @@ app.post('/index/login',
   passport.authenticate('local', { failureRedirect: '/index/login', failureFlash: true }),
   function(req, res) {
     req.flash('success','welcome back')
-    // console.log(req.user)
     res.redirect('/index');
   });
 
-  app.get('/index/forgotPassword',catchAsync(async(req,res,next)=>{
-    // const user = await User.find({email:req.body.email})
-    // console.log(user);
+  app.get('/index/forgotPassword',isLoggedOut,catchAsync(async(req,res,next)=>{
     res.render('users/forgot.ejs');
   }))
 
-  app.post('/index/forgotPassword',catchAsync(async(req,res,next)=>{
+  app.post('/index/forgotPassword',isLoggedOut,catchAsync(async(req,res,next)=>{
     const user = await User.findOne({email:req.body.email})
-    // console.log(user)
     if(!user){
       req.flash("error",'No user with such Email ID exists')
       return res.redirect('/index/forgotPassword')
@@ -330,13 +321,11 @@ app.post('/index/login',
     await user.updateOne({$set:{token:randomString}})
     sendResetPasswordMail(user.email,user.username,randomString)
     setTimeout(()=>console.log('timer'),15000);
-    // console.log(user);
-    // console.log(user.email);
     req.flash("success",'Please check your Email')
     res.redirect('/index/forgotPassword');
   }))
 
-app.get('/index/resetPassword',catchAsync(async(req,res,next)=>{
+app.get('/index/resetPassword',isLoggedOut,catchAsync(async(req,res,next)=>{
   const token = req.query.token
   const user= await User.findOne({token:token})
   if(!user || user.token == ''){
@@ -354,14 +343,13 @@ app.get('/index/logout',(req,res)=>{
   });  
 })
 
-app.post('/index/resetPassword/:id',catchAsync(async(req,res,next)=>{
+app.post('/index/resetPassword/:id',isLoggedOut,catchAsync(async(req,res,next)=>{
   const password = req.body.password
   const user=await User.findByIdAndUpdate(req.params.id,{token:''})
   User.findById(req.params.id).then(function(sanitizedUser){
     if (sanitizedUser){
         sanitizedUser.setPassword(password, function(){
             sanitizedUser.save();
-            // const user = await User.findOne(req.params._id)
             req.flash('success', "Password Updated Successfully!");
             res.redirect('/index/login');
         });
@@ -378,12 +366,7 @@ app.get('/index/giveaway/:id',catchAsync(async(req,res,next)=>{
   const {id} =req.params
   const giveaway = await Giveaway.findById(id).populate('reviews').populate('author')
   const user = await User.findById({_id:giveaway.author._id}).populate('reviews')
-  // console.log(giveaway)
   res.render('adds/showGiveaway.ejs',{giveaway,user})
-  // const {id} =req.params
-  // const giveaway = await Giveaway.findById(id).populate('reviews').populate('author')
-  // // console.log(giveaway)
-  // res.render('adds/showGiveaway.ejs',{giveaway})
 }))
 
 app.get('/index/lookingfor/:id',catchAsync(async(req,res,next)=>{
@@ -396,7 +379,6 @@ app.get('/index/lookingfor/:id',catchAsync(async(req,res,next)=>{
 app.delete("/index/giveaway/:id/delete",isLoggedIn,isVerified,isGiveawayAuthor,catchAsync(async(req,res,next)=>{
   const {id} = req.params;
   const giveaway = await Giveaway.findById(id)
-  // console.log(giveaway)
   await cloudinary.uploader.destroy(giveaway.image.filename);
   const giveaway1 = await Giveaway.findByIdAndDelete(id)
   res.redirect("/index")
@@ -409,45 +391,23 @@ app.delete("/index/lookingfor/:id/delete",isLoggedIn,isVerified,isLookingforAuth
   res.redirect("/index")
 }))
 
-// review routes
 app.post('/index/giveaway/:id/reviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
   console.log(req.user.username)
-  // if(!req.isAuthenticated()){
-  //   req.flash('error','You must be Logged In')
-  //    return res.redirect('/index/login')
-  // }else{
     const {id} = req.params;
     const giveaway = await Giveaway.findById(id).populate('author','_id');
     const review = new Review(req.body.review)
-    // console.log(giveaway.author.username)
     const user = await User.findById({_id:giveaway.author._id})
-    // console.log(user)
     giveaway.reviews.push(review);
     user.reviews.push(review)
     review.author = req.user._id
     await review.save();
     await giveaway.save();
     await user.save();
-  // const {id} = req.params;
-  // const giveaway = await Giveaway.findById(id);
-  // const review = new Review(req.body.review)
-  // giveaway.reviews.push(review);
-  // review.author = req.user._id
-  // await review.save();
-  // await giveaway.save();
-  // console.log(giveaway.reviews)
   res.redirect(`/index/giveaway/${giveaway._id}`)
 }))
 
 app.post('/index/lookingfor/:id/reviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
-  // console.log(req.user.username)
-  // if(!req.isAuthenticated()){
-  //   req.flash('error','You must be Logged In')
-  //    return res.redirect('/index/login')
-  // }
-  // else{
     const lookingfor = await Lookingfor.findById(req.params.id).populate('author','_id');
-    // console.log(req.params.id)
     const review = new Review(req.body.review)
     const user = await User.findById({_id:lookingfor.author._id})
     user.reviews.push(review)
@@ -456,15 +416,7 @@ app.post('/index/lookingfor/:id/reviews',isLoggedIn,isVerified,catchAsync(async(
     await review.save();
     await lookingfor.save();
     await user.save()
-  // const lookingfor = await Lookingfor.findById(req.params.id);
-  // // console.log(req.params.id)
-  // const review = new Review(req.body.review)
-  // lookingfor.reviews.push(review);
-  // review.author = req.user._id
-  // await review.save();
-  // await lookingfor.save();
   res.redirect(`/index/lookingfor/${lookingfor._id}`)
-  // res.send(lookingfor)
 }))
 
 app.delete('/index/giveaway/:id/reviews/:reviewId',isLoggedIn,isReviewAuthor,isVerified,catchAsync(async(req,res,next)=>{
