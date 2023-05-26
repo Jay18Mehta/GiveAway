@@ -277,9 +277,8 @@ app.post("/index/register",catchAsync(async(req,res,next)=>{
        return next(err);
     }
     sendVerificationMail(req.body.email,req.body.username,user._id)
-    setTimeout(()=>console.log('timer'),15000);
-    req.flash('success', 'Your registration is done, please verify your Email ID to continue');
-    res.redirect('/index/register');
+    req.flash('success', 'Your registration is done, please verify your Email ID to continue')
+    setTimeout(()=>res.redirect('/index/register'),15000)
   })}catch(error){
     req.flash("error","Your email ID or username is already used.")
     res.redirect('/index/register');
@@ -320,9 +319,8 @@ app.post('/index/login',
     const randomString= randomstring.generate()
     await user.updateOne({$set:{token:randomString}})
     sendResetPasswordMail(user.email,user.username,randomString)
-    setTimeout(()=>console.log('timer'),15000);
     req.flash("success",'Please check your Email')
-    res.redirect('/index/forgotPassword');
+    setTimeout(()=>res.redirect('/index/forgotPassword'),15000)
   }))
 
 app.get('/index/resetPassword',isLoggedOut,catchAsync(async(req,res,next)=>{
