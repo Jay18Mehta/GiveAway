@@ -161,7 +161,7 @@ const sendVerificationMail = async(email,username,_id)=>{
         from:process.env.NODEMAILER_MAIL,
         to:email,
         subject:'Give Away Verification Mail',
-        html:`<p>Hi ${username}, please click on the link to <a href = "cute-puce-macaw-tux.cyclic.app/index/verify?id=${_id}">Verify</a></p>`
+        html:`<p>Hi ${username}, please click on the link to <a href = "giveaway.cyclic.app/index/verify?id=${_id}">Verify</a></p>`
     }
     transporter.sendMail(mailOptions,function(error,info){
       if(error){
@@ -188,7 +188,7 @@ const sendResetPasswordMail = async(email,username,token)=>{
       from:process.env.NODEMAILER_MAIL,
       to:email,
       subject:'Give Away Reset Password',
-      html:`<p>Hi ${username}, please click on the link to <a href = "cute-puce-macaw-tux.cyclic.app/index/resetPassword?token=${token}">Reset Password</a></p>`
+      html:`<p>Hi ${username}, please click on the link to <a href = "giveaway.cyclic.app/index/resetPassword?token=${token}">Reset Password</a></p>`
   }
   transporter.sendMail(mailOptions,function(error,info){
     if(error){
@@ -541,6 +541,15 @@ app.post('/index/:id/removeFriend',isLoggedIn,isVerified,catchAsync(async(req,re
   await User.findByIdAndUpdate(req.user._id,{ $pull: { friendsList:{friendId:friend._id} } })
   await User.findByIdAndUpdate(friend._id,{ $pull: { friendsList:{friendId:req.user._id} } })
   res.redirect('/index/profile')
+}))
+
+app.get('/index/:UserName/UserReviews',isLoggedIn,isVerified,catchAsync(async(req,res,next)=>{
+  const username = req.params.UserName
+  console.log(req.params)
+  const user = await User.findOne({username:username}).populate('reviews')
+  console.log(user)
+  const reviews = user.reviews
+  res.render('users/userReviews',{reviews})
 }))
 
 app.all('*', (req, res, next) => {

@@ -1,0 +1,11 @@
+<% layout('layouts/boilerplate')%>
+<link rel="stylesheet" href="/stylesheets/stars.css">
+
+    <%for(let review of reviews){%>
+        <p class="starability-result" data-rating="<%=review.rating%>">
+            Rated: <%= review.rating %> stars
+        </p>
+        <p class="card-text">Review: <%= review.body %></p>
+        
+    <% } %>
+<script src='/javascripts/validateForms.js'></script>

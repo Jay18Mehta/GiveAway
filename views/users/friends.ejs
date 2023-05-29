@@ -13,7 +13,10 @@
                 <td><form class = "float-end"action="/index/<%=request.userId%>/deleteReq" method="post">
                   <button class="btn btn-info">Delete</button>
                 </form> </td> 
-              </div>
+                <tr><td></td><td><form class = ""action="/index/<%=request.username%>/UserReviews" method="get">
+                  <button class="btn btn-info">See Reviews</button>
+                </form> </td></tr>
+              <!-- </div> -->
             </tr>
       <% } %>
     <% } %>
@@ -44,6 +47,9 @@
             <button class="btn btn-danger">Remove Friend</button>
           </form></td>
         </tr>
+        <tr><td></td><td><form class = ""action="/index/<%=friend.friendName%>/UserReviews" method="get">
+          <button class="btn btn-info">See Reviews</button>
+        </form> </td></tr>
         </div>
       <% } %>
     </table>    
